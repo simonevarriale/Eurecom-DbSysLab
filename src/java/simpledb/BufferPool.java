@@ -2,6 +2,7 @@ package simpledb;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -21,7 +22,8 @@ public class BufferPool {
 
     private static int pageSize = DEFAULT_PAGE_SIZE;
     private int num_pages;
-    private ArrayList<Page> pool;
+    private HashMap<PageId, Page> pool;
+   
     
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
@@ -36,7 +38,7 @@ public class BufferPool {
     public BufferPool(int numPages) {
         // some code goes here
     	num_pages = numPages;
-    	pool = new ArrayList<Page>();
+    	pool = new HashMap<PageId, Page>();
     }
     
     public static int getPageSize() {
@@ -72,7 +74,21 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         // some code goes here
     	
+    	if(!pool.containsKey(pid)) {
+    		
+    		if(pool.size()< this.num_pages) {
+    			Catalog cat = Database.getCatalog();
+    			Page p = cat.getDatabaseFile(pid.getTableId()).readPage(pid);
+    			pool.put(pid, p);
+    			return p;
+    		}
+    		else {
+    			throw new DbException("DbException");
+    		}
+    	}
     	
+    	
+    	return pool.get(pid);
     	
     }
 
