@@ -2,7 +2,6 @@ package simpledb;
 
 import java.io.*;
 import java.util.*;
-
 /**
  * HeapFile is an implementation of a DbFile that stores a collection of tuples
  * in no particular order. Tuples are stored on pages, each of which is a fixed
@@ -14,7 +13,10 @@ import java.util.*;
  * @author Sam Madden
  */
 public class HeapFile implements DbFile {
-
+	
+	private File file;
+	private TupleDesc tuple_desc;
+	private int num_pages;
     /**
      * Constructs a heap file backed by the specified file.
      * 
@@ -24,6 +26,9 @@ public class HeapFile implements DbFile {
      */
     public HeapFile(File f, TupleDesc td) {
         // some code goes here
+    	this.file=f;
+    	this.tuple_desc=td;
+    	this.num_pages=(int) this.file.length()/BufferPool.getPageSize();
     }
 
     /**
@@ -33,7 +38,7 @@ public class HeapFile implements DbFile {
      */
     public File getFile() {
         // some code goes here
-        return null;
+        return this.file;
     }
 
     /**
@@ -47,7 +52,7 @@ public class HeapFile implements DbFile {
      */
     public int getId() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        return this.file.getAbsoluteFile().hashCode();
     }
 
     /**
@@ -57,13 +62,45 @@ public class HeapFile implements DbFile {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        throw new UnsupportedOperationException("implement this");
+        return this.tuple_desc;
     }
 
     // see DbFile.java for javadocs
-    public Page readPage(PageId pid) {
+    public Page readPage(PageId pid) throws IllegalArgumentException{
         // some code goes here
-        return null;
+    	byte [] datas = new byte[BufferPool.getPageSize()];
+    	int offset = pid.getPageNumber()*BufferPool.getPageSize();
+    	
+    	if(pid.getPageNumber() > this.numPages()) {
+    		throw new IllegalArgumentException();
+    	}
+    	
+    	
+    	try {
+    		
+    		if(pid.getPageNumber() == this.num_pages){
+        		this.num_pages++;
+        		return new HeapPage((HeapPageId) pid, HeapPage.createEmptyPageData());
+        	}
+    		
+    		InputStream stream = new FileInputStream(this.file);
+    		stream.skipNBytes(offset); 
+    		stream.read(datas);
+    		stream.close();
+			HeapPage hp = new HeapPage((HeapPageId) pid, datas);
+			return hp;
+			
+		} catch (FileNotFoundException e) {
+			
+			System.out.println("No such file!");
+		}
+    	catch (IOException e) {
+			
+    		throw new IllegalArgumentException();
+		}
+    	
+    	
+    	return null;
     }
 
     // see DbFile.java for javadocs
@@ -77,7 +114,7 @@ public class HeapFile implements DbFile {
      */
     public int numPages() {
         // some code goes here
-        return 0;
+        return this.num_pages;
     }
 
     // see DbFile.java for javadocs
@@ -99,7 +136,7 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public DbFileIterator iterator(TransactionId tid) {
         // some code goes here
-        return null;
+        return (DbFileIterator) new HFiterator(this, tid);
     }
 
 }

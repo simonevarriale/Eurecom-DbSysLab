@@ -82,7 +82,7 @@ public class HeapPage implements Page {
         
         // some code goes here
     	//each page has an header made by one bit for each slot (that represent a tuple)
-    	return (int) Math.ceil(this.numSlots / 8);
+    	return (int) Math.ceil(this.numSlots / 8.0);
                  
     }
     

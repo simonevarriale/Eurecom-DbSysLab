@@ -1,5 +1,6 @@
 package simpledb;
 
+import java.util.Objects;
 
 /** Unique identifier for HeapPage objects. */
 public class HeapPageId implements PageId {
@@ -40,12 +41,12 @@ public class HeapPageId implements PageId {
      *   key in a hash table in the BufferPool, for example.)
      * @see BufferPool
      */
-    public int hashCode() {
-        // some code goes here
-    	String concatenation = "" + this.table_id + this.page_num;
-    	return Integer.parseInt(concatenation);
-        
-    }
+    @Override
+	public int hashCode() {
+		return Objects.hash(page_num, table_id);
+	}
+    
+    
 
     /**
      * Compares one PageId to another.
@@ -54,20 +55,18 @@ public class HeapPageId implements PageId {
      * @return true if the objects are equal (e.g., page numbers and table
      *   ids are the same)
      */
-    public boolean equals(Object o) {
-        // some code goes here
-    	if(!(o instanceof HeapPageId)) {
-    		return false;
-    	}
-    	
-    	HeapPageId hpid = (HeapPageId) o;
-    	
-    	if(hpid.page_num == this.page_num && hpid.table_id==this.table_id) {
-    		return true;
-    	}
-    	
-        return false;
-    }
+    @Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HeapPageId other = (HeapPageId) obj;
+		return page_num == other.page_num && table_id == other.table_id;
+	}
+    
 
     /**
      *  Return a representation of this object as an array of
@@ -83,5 +82,9 @@ public class HeapPageId implements PageId {
 
         return data;
     }
+
+	
+
+	
 
 }
