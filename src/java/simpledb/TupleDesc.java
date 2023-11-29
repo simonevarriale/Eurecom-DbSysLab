@@ -37,6 +37,7 @@ public class TupleDesc implements Serializable {
         }
     }
 
+    private ArrayList<TDItem> TD_list;
     /**
      * @return
      *        An iterator which iterates over all the field TDItems
@@ -48,7 +49,7 @@ public class TupleDesc implements Serializable {
     }
 
     private static final long serialVersionUID = 1L;
-    private ArrayList<TDItem> TD_list;
+    
 
     /**
      * Create a new TupleDesc with typeAr.length fields with fields of the
@@ -64,9 +65,11 @@ public class TupleDesc implements Serializable {
     public TupleDesc(Type[] typeAr, String[] fieldAr) {
         // some code goes here
     	TD_list = new ArrayList<TDItem>();
-    	for(int i = 0; i<typeAr.length; i++) {
-    		TDItem td = new TDItem(typeAr[i], fieldAr[i]);
-    		TD_list.add(td);
+    	if(typeAr.length == fieldAr.length) {
+	    	for(int i = 0; i<typeAr.length; i++) {
+	    		TDItem td = new TDItem(typeAr[i], fieldAr[i]);
+	    		TD_list.add(td);
+	    	}
     	}
     }
 
@@ -147,11 +150,11 @@ public class TupleDesc implements Serializable {
     	}
     	
     	for(int i =0; i<TD_list.size(); i++) {
-    		if(TD_list.get(i).fieldName == null) {
-    			throw new NoSuchElementException();
+    		if(TD_list.get(i).fieldName != null) {
+    			
+	    		if(TD_list.get(i).fieldName.compareTo(name)==0) 
+	    			return i;
     		}
-    		if(TD_list.get(i).fieldName.compareTo(name)==0) 
-    			return i;
     	}
     	throw new NoSuchElementException();
     }

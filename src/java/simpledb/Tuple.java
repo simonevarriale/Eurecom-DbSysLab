@@ -92,7 +92,6 @@ public class Tuple implements Serializable {
         // some code goes here
     	if(i<0 ||  i>=this.tuple.size()) {
     		return null;
-    		
     	}
     	return this.tuple.get(i);
     }

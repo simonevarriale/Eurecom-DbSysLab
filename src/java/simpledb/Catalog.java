@@ -45,9 +45,9 @@ public class Catalog {
     public void addTable(DbFile file, String name, String pkeyField) {
         // some code goes here
     	if (name != null) {
-    	name_content.put(name, file);
-    	name_pk.put(name, pkeyField);
-    	tid_name.put(file.getId(), name);
+    		name_content.put(name, file);
+    		name_pk.put(name, pkeyField);
+    		tid_name.put(file.getId(), name);
     	}
     }
 
