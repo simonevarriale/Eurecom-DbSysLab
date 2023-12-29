@@ -11,6 +11,8 @@ public class Join extends Operator {
     private JoinPredicate p;
     private OpIterator child1;
     private OpIterator child2;
+    private Tuple t1;
+	private Tuple t2;
 
     /**
      * Constructor. Accepts two children to join and the predicate to join them
@@ -28,6 +30,7 @@ public class Join extends Operator {
     	this.p = p;
     	this.child1 = child1;
     	this.child2 = child2;
+    	t1 = t2 = null;
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -106,14 +109,14 @@ public class Join extends Operator {
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here
     	
+    	while (child1.hasNext() || t1 != null){
     	
-    	while (child1.hasNext()){
-    	
-            Tuple t1 = child1.next();
+    		if(t1 == null)
+    			t1 = child1.next();
             
             while (child2.hasNext()) {
             	
-                Tuple t2 = child2.next();
+                t2 = child2.next();
 
                 if (p.filter(t1, t2)) {
                     // Tuples satisfy the join predicate
@@ -130,13 +133,14 @@ public class Join extends Operator {
                     for (int i = 0; i < numFieldsT2; i++) {
                         joinedTuple.setField(numFieldsT1 + i, t2.getField(i));
                     }
-                    System.out.println(joinedTuple.toString());
+                    
                     return joinedTuple;
                 }
             }
 
             // Reset child2 for the next iteration
-            this.child2.rewind();
+            child2.rewind();
+            t1 = null;
         }
 
         // No more matching tuples
