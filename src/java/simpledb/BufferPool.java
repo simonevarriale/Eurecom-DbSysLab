@@ -3,6 +3,8 @@ package simpledb;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,7 +25,9 @@ public class BufferPool {
     private static int pageSize = DEFAULT_PAGE_SIZE;
     private int num_pages;
     private HashMap<PageId, Page> pool;
+    private ArrayList<PageId> orderedPids;
    
+    
     
     /** Default number of pages passed to the constructor. This is used by
     other classes. BufferPool should use the numPages argument to the
@@ -39,6 +43,7 @@ public class BufferPool {
         // some code goes here
     	num_pages = numPages;
     	pool = new HashMap<PageId, Page>();
+    	orderedPids = new ArrayList<PageId> ();
     }
     
     public static int getPageSize() {
@@ -81,10 +86,12 @@ public class BufferPool {
     			Catalog cat = Database.getCatalog();
     			Page p = cat.getDatabaseFile(pid.getTableId()).readPage(pid);
     			pool.put(pid, p);
+    			orderedPids.add(pid);
     			return p;
     		}
     		else {
-    			throw new DbException("DbException");
+    			//throw new DbException("DbException");
+    			evictPage();
     		}
     	}
     	
@@ -197,6 +204,9 @@ public class BufferPool {
     public synchronized void flushAllPages() throws IOException {
         // some code goes here
         // not necessary for lab1
+    	for (PageId pid: pool.keySet()) {
+    		this.flushPage(pid);
+    	}
 
     }
 
@@ -211,6 +221,7 @@ public class BufferPool {
     public synchronized void discardPage(PageId pid) {
         // some code goes here
         // not necessary for lab1
+    	pool.remove(pid);
     }
 
     /**
@@ -220,6 +231,10 @@ public class BufferPool {
     private synchronized  void flushPage(PageId pid) throws IOException {
         // some code goes here
         // not necessary for lab1
+    	if (pool.get(pid).isDirty() != null) {
+    		Database.getCatalog().getDatabaseFile(pid.getTableId()).writePage(pool.get(pid));
+    		pool.get(pid).markDirty(false, null);
+    	}
     }
 
     /** Write all pages of the specified transaction to disk.
@@ -236,6 +251,14 @@ public class BufferPool {
     private synchronized  void evictPage() throws DbException {
         // some code goes here
         // not necessary for lab1
+    	try {
+			this.flushPage(orderedPids.get(0));
+			this.discardPage(orderedPids.get(0));
+			orderedPids.remove(0);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }

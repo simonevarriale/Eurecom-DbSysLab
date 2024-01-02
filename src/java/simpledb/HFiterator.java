@@ -10,22 +10,28 @@ public class HFiterator implements DbFileIterator {
 	private HeapFile hf;
 	private int page_num;
 	private Iterator<Tuple> it;
+	private int maxNPages;
 	
-	public HFiterator(HeapFile hf, TransactionId tid) {
+	public HFiterator(HeapFile hf, TransactionId tid, int maxNPages) {
         // some code goes here
     	this.tid=tid;
     	this.hf = hf;
     	this.page_num =0;
     	this.it = null;
+    	this.maxNPages = maxNPages;
     }
 	
 
 	@Override
 	public void open() throws DbException, TransactionAbortedException {
-		HeapPageId pageId = new HeapPageId(this.hf.getId(), this.page_num);
-		this.page_num++;
-		HeapPage hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
-		this.it = hp.iterator();
+		
+		if (this.page_num<maxNPages) {
+			HeapPageId pageId = new HeapPageId(this.hf.getId(), this.page_num);
+			HeapPage hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
+			this.it = hp.iterator();
+			this.page_num++;
+		}
+		else throw new DbException("");
 	}
 
 	@Override
@@ -66,6 +72,7 @@ public class HFiterator implements DbFileIterator {
 	@Override
 	public void rewind() throws DbException, TransactionAbortedException {
 		this.page_num=0;
+		this.close();
 		this.open();
 	}
 

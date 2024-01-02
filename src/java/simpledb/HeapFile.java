@@ -107,6 +107,20 @@ public class HeapFile implements DbFile {
     public void writePage(Page page) throws IOException {
         // some code goes here
         // not necessary for lab1
+    	int offset = page.getId().getPageNumber()*BufferPool.getPageSize();
+    	  	
+    	try {
+    		RandomAccessFile stream = new RandomAccessFile(this.file, "rw");
+    		stream.seek(offset);
+    		stream.write(page.getPageData());
+    		
+		} 
+    	
+    	catch (IOException e) {
+			
+    		throw new IOException("Error in writing the page");
+		}
+    
     }
 
     /**
@@ -160,9 +174,8 @@ public class HeapFile implements DbFile {
     	
     	HeapPage hp = (HeapPage)Database.getBufferPool().getPage(tid, t.getRecordId().getPageId(), Permissions.READ_WRITE);
         hp.deleteTuple(t);
-        hp.markDirty(true, tid);
+        //hp.markDirty(true, tid);
         modPages.add(hp);
-        
         
         return modPages;
         
@@ -171,8 +184,7 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public DbFileIterator iterator(TransactionId tid) {
         // some code goes here
-        return (DbFileIterator) new HFiterator(this, tid);
+        return (DbFileIterator) new HFiterator(this, tid, this.num_pages);
     }
 
 }
-
