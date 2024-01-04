@@ -91,7 +91,7 @@ public class BufferPool {
     		}
     		else {
     			//throw new DbException("DbException");
-    			evictPage();
+    			this.evictPage();
     		}
     	}
     	

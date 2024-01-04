@@ -11,12 +11,14 @@ public class HFiterator implements DbFileIterator {
 	private int page_num;
 	private Iterator<Tuple> it;
 	private int maxNPages;
+	private HeapPageId pageId;
+	private HeapPage hp;
 	
 	public HFiterator(HeapFile hf, TransactionId tid, int maxNPages) {
         // some code goes here
     	this.tid=tid;
     	this.hf = hf;
-    	this.page_num =0;
+    	this.page_num=0;
     	this.it = null;
     	this.maxNPages = maxNPages;
     }
@@ -25,13 +27,10 @@ public class HFiterator implements DbFileIterator {
 	@Override
 	public void open() throws DbException, TransactionAbortedException {
 		
-		if (this.page_num<maxNPages) {
-			HeapPageId pageId = new HeapPageId(this.hf.getId(), this.page_num);
-			HeapPage hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
-			this.it = hp.iterator();
-			this.page_num++;
-		}
-		else throw new DbException("");
+		this.pageId = new HeapPageId(this.hf.getId(), this.page_num);
+		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
+		this.it = hp.iterator();
+		
 	}
 
 	@Override
@@ -39,16 +38,14 @@ public class HFiterator implements DbFileIterator {
 		
 		if (this.it == null) return false;
 		
-		if(this.it.hasNext()){
-			return true;
-		}
-		else {
-			if(this.page_num<this.hf.numPages()) {
-				return true;
-			}
-		}
+		if(this.page_num < this.maxNPages - 1) {
+            if(it.hasNext())
+                return true;
+            else
+                this.fetchNextPage();
+        }
 		
-		return false;
+        return it.hasNext();
 	
 	}
 
@@ -56,14 +53,7 @@ public class HFiterator implements DbFileIterator {
 	public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
 		
 		if(this.hasNext()) {
-			if(this.it.hasNext()) {
-				return this.it.next();			}
-			else {
-				this.open();
-				if(this.it.hasNext()) {
-					return this.it.next();
-				}
-			}
+			return this.it.next();
 		}
 		
 		throw new NoSuchElementException();
@@ -81,5 +71,12 @@ public class HFiterator implements DbFileIterator {
 		this.page_num=0;
 		this.it = null;
 	}
+	
+	public void fetchNextPage() throws TransactionAbortedException, DbException {
+        this.page_num++;
+        this.pageId = new HeapPageId(this.hf.getId(), this.page_num);
+		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
+		this.it = hp.iterator();
+    }
 
 }

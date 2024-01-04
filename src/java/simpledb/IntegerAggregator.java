@@ -56,7 +56,7 @@ public class IntegerAggregator implements Aggregator {
         // some code goes here
     	Field groupField;
         IntField aggregateField;
-        if(gbfield != Aggregator.NO_GROUPING) {
+        if(this.gbfield != Aggregator.NO_GROUPING) {
             groupField = tup.getField(gbfield);
             gbfieldName = tup.getTupleDesc().getFieldName(gbfield);
         }
@@ -66,33 +66,46 @@ public class IntegerAggregator implements Aggregator {
         aggregateField = (IntField) tup.getField(afield);
         afieldName = tup.getTupleDesc().getFieldName(afield);
         
-        if(what == Op.COUNT || what == Op.AVG){
+        if(this.what == Op.COUNT){
         	if(count.containsKey(groupField)) {
         		count.put(groupField, count.get(groupField) + 1);
         	}
         	else count.put(groupField,1);
     		
     	}
-    	else if(what == Op.SUM || what == Op.AVG){
+    	
+        if(this.what == Op.SUM){
     		if(sum.containsKey(groupField)) {
         		sum.put(groupField, sum.get(groupField)+ aggregateField.getValue());
         	}
         	else sum.put(groupField, aggregateField.getValue());
     		
     	}
-		else if(what == Op.AVG){
-			//if(count.containsKey(groupField) && sum.containsKey(groupField))
-				avg.put(groupField, count.get(groupField) != 0 ? (int) sum.get(groupField) / count.get(groupField) : 0);
-			//else
-			//	avg.put(groupField, 0);
+		
+        if(this.what == Op.AVG){
+        	
+        	if(count.containsKey(groupField)) {
+        		count.put(groupField, count.get(groupField) + 1);
+        	}
+        	else count.put(groupField,1);
+        	
+        	if(sum.containsKey(groupField)) {
+        		sum.put(groupField, sum.get(groupField)+ aggregateField.getValue());
+        	}
+        	else sum.put(groupField, aggregateField.getValue());
+        	
+			avg.put(groupField, sum.get(groupField) / count.get(groupField));
+
 		}
-		else if(what == Op.MIN){
+		
+        if(this.what == Op.MIN){
 			if(min.containsKey(groupField)) {
 				min.put(groupField, Math.min( min.get(groupField), aggregateField.getValue()) );
         	}
         	else min.put(groupField, aggregateField.getValue());
 		}
-		else if(what == Op.MAX){
+		
+        if(this.what == Op.MAX){
 			if(max.containsKey(groupField)) {
 				max.put(groupField, Math.max( max.get(groupField), aggregateField.getValue()) );
         	}
@@ -137,7 +150,6 @@ public class IntegerAggregator implements Aggregator {
     	ArrayList<Tuple> tuples = new ArrayList<Tuple>();
     	
     	if(what == Op.COUNT){
-    		
     		tuples = getTuples(count, td);
     	}
     	else if(what == Op.AVG){

@@ -1,11 +1,23 @@
 package simpledb;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import simpledb.Aggregator.Op;
+
 /**
  * Knows how to compute some aggregate over a set of StringFields.
  */
 public class StringAggregator implements Aggregator {
 
     private static final long serialVersionUID = 1L;
+    private int gbfield;
+    private Type gbfieldtype;
+    private int afield;
+    private Op what;
+    private String afieldName, gbfieldName;
+    private HashMap<Field, Integer> count;
 
     /**
      * Aggregate constructor
@@ -18,6 +30,16 @@ public class StringAggregator implements Aggregator {
 
     public StringAggregator(int gbfield, Type gbfieldtype, int afield, Op what) {
         // some code goes here
+    	
+    	if(what != Op.COUNT) {
+    		throw new IllegalArgumentException("Operation not supported");
+    	}
+    	
+    	this.gbfield = gbfield;
+    	this.gbfieldtype = gbfieldtype;
+    	this.afield = afield;
+    	this.what = what;
+    	this.count = new HashMap<>();
     }
 
     /**
@@ -26,6 +48,25 @@ public class StringAggregator implements Aggregator {
      */
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
+    	Field groupField;
+        Field aggregateField;
+        if(this.gbfield != Aggregator.NO_GROUPING) {
+            groupField = tup.getField(gbfield);
+            gbfieldName = tup.getTupleDesc().getFieldName(gbfield);
+        }
+        else
+            groupField = new IntField(Aggregator.NO_GROUPING);
+        
+        aggregateField = tup.getField(afield);
+        afieldName = tup.getTupleDesc().getFieldName(afield);
+        
+        if(this.what == Op.COUNT){
+        	if(count.containsKey(groupField)) {
+        		count.put(groupField, count.get(groupField) + 1);
+        	}
+        	else count.put(groupField,1);
+    		
+    	}
     }
 
     /**
@@ -38,7 +79,51 @@ public class StringAggregator implements Aggregator {
      */
     public OpIterator iterator() {
         // some code goes here
-        throw new UnsupportedOperationException("please implement me for lab2");
+    	Type[] type;
+    	String[] field;
+    	
+    	if(gbfield == Aggregator.NO_GROUPING) {
+    		type = new Type[1];
+    		field = new String[1];
+    		type[0] = /*Type.INT_TYPE*/ null;
+            field[0] = afieldName;
+    	}
+    	else {
+    		type = new Type[2];
+    		field = new String[2];
+            type[0] = gbfieldtype;
+            field[0] = gbfieldName;
+            type[1] = Type.INT_TYPE;
+            field[1] = afieldName;
+    		
+    	}
+    	
+    	TupleDesc td = new TupleDesc(type,field);
+    	ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+    	
+ 
+    	for(Map.Entry<Field, Integer> e : count.entrySet()) {
+    		
+    		Field f = e.getKey();
+    		int value = e.getValue();
+    		
+    		Tuple t = new Tuple(td);
+    		
+    		if(td.numFields() == 1){
+                t.setField(0, new IntField(value));
+            }
+            else {
+                t.setField(0, f);
+                t.setField(1, new IntField(value));
+            }
+            tuples.add(t);
+    		
+    	}
+    	
+    	
+    	
+    	return new TupleIterator(td, tuples);
     }
+    
 
 }
