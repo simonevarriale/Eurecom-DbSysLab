@@ -71,8 +71,8 @@ public class SeqScan implements OpIterator {
      */
     public void reset(int tableid, String tableAlias) {
         // some code goes here
-    	this.tableid = -1;
-    	this.tableAlias = null;
+    	this.tableid = tableid;
+    	this.tableAlias = tableAlias;
     }
 
     public SeqScan(TransactionId tid, int tableId) {

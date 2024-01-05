@@ -28,7 +28,7 @@ public class HFiterator implements DbFileIterator {
 	public void open() throws DbException, TransactionAbortedException {
 		
 		this.pageId = new HeapPageId(this.hf.getId(), this.page_num);
-		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
+		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_WRITE);
 		this.it = hp.iterator();
 		
 	}
@@ -38,11 +38,16 @@ public class HFiterator implements DbFileIterator {
 		
 		if (this.it == null) return false;
 		
-		if(this.page_num < this.maxNPages - 1) {
+		if(this.page_num < this.maxNPages) {
             if(it.hasNext())
                 return true;
-            else
-                this.fetchNextPage();
+            else {
+            	this.page_num++;
+                this.pageId = new HeapPageId(this.hf.getId(), this.page_num);
+        		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_WRITE);
+        		this.it = hp.iterator();
+            }
+                
         }
 		
         return it.hasNext();
@@ -51,6 +56,9 @@ public class HFiterator implements DbFileIterator {
 
 	@Override
 	public Tuple next() throws DbException, TransactionAbortedException, NoSuchElementException {
+		
+		if (it==null)
+            throw new DbException("Iterator not opened yet");
 		
 		if(this.hasNext()) {
 			return this.it.next();
@@ -61,7 +69,9 @@ public class HFiterator implements DbFileIterator {
 
 	@Override
 	public void rewind() throws DbException, TransactionAbortedException {
-		this.page_num=0;
+		
+		if (it==null)
+            throw new DbException("Iterator not opened yet");
 		this.close();
 		this.open();
 	}
@@ -70,13 +80,9 @@ public class HFiterator implements DbFileIterator {
 	public void close() {
 		this.page_num=0;
 		this.it = null;
+		this.pageId = null;
+		this.hp = null;
 	}
 	
-	public void fetchNextPage() throws TransactionAbortedException, DbException {
-        this.page_num++;
-        this.pageId = new HeapPageId(this.hf.getId(), this.page_num);
-		this.hp = (HeapPage) Database.getBufferPool().getPage(this.tid, pageId, Permissions.READ_ONLY);
-		this.it = hp.iterator();
-    }
 
 }

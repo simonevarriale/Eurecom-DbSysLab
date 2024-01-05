@@ -82,17 +82,15 @@ public class BufferPool {
     	
     	if(!pool.containsKey(pid)) {
     		
-    		if(pool.size()< this.num_pages) {
-    			Catalog cat = Database.getCatalog();
-    			Page p = cat.getDatabaseFile(pid.getTableId()).readPage(pid);
-    			pool.put(pid, p);
-    			orderedPids.add(pid);
-    			return p;
+    		if(pool.size() == this.num_pages) {
+    			evictPage();
     		}
-    		else {
-    			//throw new DbException("DbException");
-    			this.evictPage();
-    		}
+    		
+    		Catalog cat = Database.getCatalog();
+			Page p = cat.getDatabaseFile(pid.getTableId()).readPage(pid);
+			pool.put(pid, p);
+			orderedPids.add(pid);
+				
     	}
     	
     	
@@ -222,6 +220,7 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
     	pool.remove(pid);
+    	orderedPids.remove(pid);
     }
 
     /**
@@ -253,13 +252,14 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
     	try {
-			this.flushPage(orderedPids.get(0));
-			this.discardPage(orderedPids.get(0));
-			orderedPids.remove(0);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    		
+			flushPage(orderedPids.get(0));
+			discardPage(orderedPids.get(0));
+						
+		} catch (Exception e) {
+            throw new DbException("Flush failed");
+        }
+    	
     }
 
 }
