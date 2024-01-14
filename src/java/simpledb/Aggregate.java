@@ -129,10 +129,12 @@ public class Aggregate extends Operator {
     	super.open();
     	child.open();
     	
+    	//merging all the tuple of child into the aggregate
     	while(child.hasNext()) {
     		aggregator.mergeTupleIntoGroup(child.next());
     	}
     	
+    	//when it finish we open the iterator over the aggregator
     	it = aggregator.iterator();
     	it.open();
     	

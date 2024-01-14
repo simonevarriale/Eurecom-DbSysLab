@@ -56,16 +56,24 @@ public class IntegerAggregator implements Aggregator {
         // some code goes here
     	Field groupField;
         IntField aggregateField;
+        
+        //if there is a group by field
         if(this.gbfield != Aggregator.NO_GROUPING) {
+        	
+        	//assign gb field and save also the name (useful later for the TupleDesc in Iterator)
             groupField = tup.getField(gbfield);
             gbfieldName = tup.getTupleDesc().getFieldName(gbfield);
         }
         else
+        	//otherwise group field is just an IntField
             groupField = new IntField(Aggregator.NO_GROUPING);
         
+        //assign the aggregate field and save name for the same reason as before
         aggregateField = (IntField) tup.getField(afield);
         afieldName = tup.getTupleDesc().getFieldName(afield);
         
+        
+        //updating the map with the aggregate
         if(this.what == Op.COUNT){
         	if(count.containsKey(groupField)) {
         		count.put(groupField, count.get(groupField) + 1);
@@ -82,6 +90,7 @@ public class IntegerAggregator implements Aggregator {
     		
     	}
 		
+        //in case of avg we need to update both count and sum in order to perform the avg casted to int
         if(this.what == Op.AVG){
         	
         	if(count.containsKey(groupField)) {
@@ -130,10 +139,11 @@ public class IntegerAggregator implements Aggregator {
     	Type[] type;
     	String[] field;
     	
+    	//assigning the type and field for the TupleDesc
     	if(gbfield == Aggregator.NO_GROUPING) {
     		type = new Type[1];
     		field = new String[1];
-    		type[0] = /*Type.INT_TYPE*/ null;
+    		type[0] = null;
             field[0] = afieldName;
     	}
     	else {
@@ -149,6 +159,7 @@ public class IntegerAggregator implements Aggregator {
     	TupleDesc td = new TupleDesc(type,field);
     	ArrayList<Tuple> tuples = new ArrayList<Tuple>();
     	
+    	//basing on the operation we get the tuples from the map
     	if(what == Op.COUNT){
     		tuples = getTuples(count, td);
     	}
@@ -173,6 +184,7 @@ public class IntegerAggregator implements Aggregator {
     	
     	ArrayList<Tuple> tuples = new ArrayList<Tuple>();
     	
+    	//scanning the map creating the result
     	for(Map.Entry<Field, Integer> e : result.entrySet()) {
     		
     		Field f = e.getKey();

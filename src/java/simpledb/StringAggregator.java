@@ -49,7 +49,9 @@ public class StringAggregator implements Aggregator {
     public void mergeTupleIntoGroup(Tuple tup) {
         // some code goes here
     	Field groupField;
-        Field aggregateField;
+    	//no aggregate field here because we just need to add one
+        
+    	//assign gb field and save also the name (useful later for the TupleDesc in Iterator)
         if(this.gbfield != Aggregator.NO_GROUPING) {
             groupField = tup.getField(gbfield);
             gbfieldName = tup.getTupleDesc().getFieldName(gbfield);
@@ -57,7 +59,7 @@ public class StringAggregator implements Aggregator {
         else
             groupField = new IntField(Aggregator.NO_GROUPING);
         
-        aggregateField = tup.getField(afield);
+       
         afieldName = tup.getTupleDesc().getFieldName(afield);
         
         if(this.what == Op.COUNT){
@@ -82,10 +84,11 @@ public class StringAggregator implements Aggregator {
     	Type[] type;
     	String[] field;
     	
+    	//assigning the type and field for the TupleDesc
     	if(gbfield == Aggregator.NO_GROUPING) {
     		type = new Type[1];
     		field = new String[1];
-    		type[0] = /*Type.INT_TYPE*/ null;
+    		type[0] = null;
             field[0] = afieldName;
     	}
     	else {
@@ -101,7 +104,7 @@ public class StringAggregator implements Aggregator {
     	TupleDesc td = new TupleDesc(type,field);
     	ArrayList<Tuple> tuples = new ArrayList<Tuple>();
     	
- 
+    	//we have only the count in case of string so we just retrieve the tuples for the result
     	for(Map.Entry<Field, Integer> e : count.entrySet()) {
     		
     		Field f = e.getKey();
