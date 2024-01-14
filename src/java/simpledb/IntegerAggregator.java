@@ -94,7 +94,7 @@ public class IntegerAggregator implements Aggregator {
         	}
         	else sum.put(groupField, aggregateField.getValue());
         	
-			avg.put(groupField, sum.get(groupField) / count.get(groupField));
+			avg.put(groupField, (int) (sum.get(groupField) / count.get(groupField)));
 
 		}
 		
