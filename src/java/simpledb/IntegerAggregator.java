@@ -192,6 +192,7 @@ public class IntegerAggregator implements Aggregator {
     		
     		Tuple t = new Tuple(td);
     		
+    		//if td has just one field there is no grouping so we need to store only the aggregate
     		if(td.numFields() == 1){
                 t.setField(0, new IntField(value));
             }

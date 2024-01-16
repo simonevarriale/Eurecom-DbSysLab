@@ -10,7 +10,7 @@ import simpledb.TupleDesc.TDItem;
  */
 public class TupleDesc implements Serializable {
 
-    /**
+	/**
      * A help class to facilitate organizing the information of each field
      * */
     public static class TDItem implements Serializable {
@@ -245,13 +245,9 @@ public class TupleDesc implements Serializable {
      * 
      * @return String describing this descriptor.
      */
-    public String toString() {
-        // some code goes here
-    	String str = "";
-    	for(int i=0; i<this.getSize(); i++) {
-    		
-    		str+= this.getFieldType(i) + "(" + this.getFieldName(i) + "), ";
-    	}
-        return str;
-    }
+    
+    @Override
+	public String toString() {
+		return "TupleDesc [TD_list=" + TD_list + "]";
+	}
 }

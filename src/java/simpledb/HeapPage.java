@@ -277,8 +277,8 @@ public class HeapPage implements Page {
     public void insertTuple(Tuple t) throws DbException {
         // some code goes here
         // not necessary for lab1
-    	if(t.getTupleDesc() != this.td) {
-    		//throw new DbException("TupleDesc mismatch");
+    	if(t.getTupleDesc().equals(this.td)) {
+    		throw new DbException("TupleDesc mismatch");
     	}
     	
     	for(int i=0; i<this.numSlots; i++) {
