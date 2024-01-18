@@ -248,6 +248,6 @@ public class TupleDesc implements Serializable {
     
     @Override
 	public String toString() {
-		return "TupleDesc [TD_list=" + TD_list + "]";
+		return "TupleDesc " + TD_list;
 	}
 }
