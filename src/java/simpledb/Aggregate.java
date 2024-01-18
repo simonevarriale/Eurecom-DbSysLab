@@ -182,7 +182,7 @@ public class Aggregate extends Operator {
     	if(gfield == -1) {
     		type = new Type[1];
     		field = new String[1];
-    		type[0] = /*Type.INT_TYPE*/ null;
+    		type[0] = null;
             field[0] = child.getTupleDesc().getFieldName(afield);
     	}
     	else {

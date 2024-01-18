@@ -79,7 +79,7 @@ public class HeapFile implements DbFile {
     	try {
     		
     		if(pid.getPageNumber() == this.numPages()){
-        		//this.num_pages++;
+        		
         		return new HeapPage((HeapPageId) pid, HeapPage.createEmptyPageData());
         	}
     		
@@ -176,7 +176,7 @@ public class HeapFile implements DbFile {
     	
     	HeapPage hp = (HeapPage)Database.getBufferPool().getPage(tid, t.getRecordId().getPageId(), Permissions.READ_WRITE);
         hp.deleteTuple(t);
-        //hp.markDirty(true, tid);
+        
         modPages.add(hp);
         
         return modPages;

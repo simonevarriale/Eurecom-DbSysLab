@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -252,9 +253,10 @@ public class BufferPool {
         // some code goes here
         // not necessary for lab1
     	try {
-    		
-			flushPage(orderedPids.get(0));
-			discardPage(orderedPids.get(0));
+    		Random r = new Random();
+    		int r_index = r.nextInt(orderedPids.size());
+			flushPage(orderedPids.get(r_index));
+			discardPage(orderedPids.get(r_index));
 						
 		} catch (Exception e) {
             throw new DbException("Flush failed");
